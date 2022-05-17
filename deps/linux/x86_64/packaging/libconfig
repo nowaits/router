@@ -1,0 +1,154 @@
+# =============================================================================
+#
+# SixOS configuration procedures
+#
+# Procedures used by framework configuration scripts:
+# Makefile, setconfig, mkconfig
+#
+# Copyright (C) 2004 6WIND
+#
+# =============================================================================
+
+# =============================================================================
+# fix_name
+#
+# Fix a string
+# Switch to upper-case and replace special characters by underscores
+#
+# $1: string to fix
+#
+fix_name()
+{
+	echo $1 | tr '[\-\.\/\+a-z]' '[____A-Z]'
+}
+
+# =============================================================================
+# reset_in_config
+#
+# Disable an option in a .config file
+#
+# $1: option name (ex: CONFIG_KERNEL)
+# $2: file
+#
+reset_in_config()
+{
+    # if config is already ok
+    if grep -q "^ *# *$1 *is not set *$" $2; then
+       echo "$1 is already disable in $2"
+
+    # if config exists in file
+    elif grep -q "$1[= ]" $2; then
+	echo "Disable $1 in $2"
+	sed 's,^.*\(\<'$1'\>\).*$,# \1 is not set,g' $2 > $2.packagertmp
+	mv $2.packagertmp $2
+    else
+	echo "Add a line <# $1 is not set> in $2"
+	echo "# $1 is not set" >> $2
+    fi
+}
+
+# =============================================================================
+# set_in_config
+#
+# Enable an option in a .config file
+#
+# $1: option name (ex: CONFIG_KERNEL)
+# $2: file
+# $3: value (example 'y', without quote)
+#
+set_val_in_config()
+{
+    if [ "$3" = "n" ]; then
+
+	reset_in_config $1 $2
+    else
+	 # if config is already ok
+	if grep -q "^ *$1 *= *$3 *$" $2; then
+	    echo "$1 is already at $3 in $2"
+
+	# if config exists in file
+	elif grep -q "$1[= ]" $2; then
+	    echo "Set $1 in $2"
+	    sed 's,^.*\(\<'$1'\>\).*$,\1='$3',g' $2 > $2.packagertmp
+	    mv $2.packagertmp $2
+	else
+	    echo "Add a line <$1=$3> in $2"
+	    echo "$1=$3" >> $2
+	fi
+    fi
+}
+
+# ==============================================================================
+# compare_linux versions
+#
+# $1: version1
+# $2: operator
+# $3: version2
+#
+# return 0 (success) if (version1 OP version2) is true
+#
+# note: "3.4.0" and "3.4" will be returned as equal
+#
+# example:
+#   $ if compare_linux_version 3.4.5 -lt 3.5; then echo toto; fi
+#   toto
+#
+# The possible operators are the one supported by "test": -eq, -lt, -le,
+# -gt, -ge, ...
+compare_linux_version()
+{
+	if [ $# != 3 ]; then
+		echo "bad arguments"
+		exit 1
+	fi
+
+	OP=$2
+
+	# split 3.2.0 in a list (3 2 0)
+	V1=($(echo $1 | sed 's,\., ,g'))
+	V2=($(echo $3 | sed 's,\., ,g'))
+
+	# get list len
+	V1_LEN=${#V1[@]}
+	V2_LEN=${#V2[@]}
+
+	# get max len
+	MAX_LEN=${V1_LEN}
+	if [ $V2_LEN -gt $V1_LEN ]; then
+		MAX_LEN=${V2_LEN}
+	fi
+
+	i=0
+	while true; do
+		ELT1=${V1[$i]}
+		ELT2=${V2[$i]}
+
+		# both elts are empty, version are equal
+		if [ "${ELT1}" = "" -a "${ELT2}" = "" ]; then
+		        test 0 ${OP} 0
+			return $?
+		fi
+
+		# if one element is empty, set it as 0
+		if [ "${ELT1}" = "" ]; then
+			ELT1=0
+		fi
+		if [ "${ELT2}" = "" ]; then
+			ELT2=0
+		fi
+
+		# if kernel version is something like 3.10.0-rc2, we
+		# need to remove -rc2
+		ELT1=`echo ${ELT1} | sed 's/-.*//'`
+		ELT2=`echo ${ELT2} | sed 's/-.*//'`
+
+		# elements are equal, compare next
+		if [ ${ELT1} -eq ${ELT2} ]; then
+			i=$((i+1))
+			continue
+		fi
+
+		test ${ELT1} ${OP} ${ELT2}
+		return $?
+	done
+}

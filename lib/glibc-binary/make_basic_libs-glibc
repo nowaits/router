@@ -1,0 +1,116 @@
+# !/bin/bash
+
+# This script installs toolchain libraries in romfs and in
+# snapgear/debug.
+#
+# - install 32 bits libraries in /lib or /lib32
+# - install 64 bits libraries in /lib64
+#
+# notice: to crosscompile 32-bit binaries on a host x86_64 you need to install these packages:
+# libc6-dev-i386, lib32gcc1 and lib32stdc++6 g++-multilib (for debian lenny)
+
+LIB_LIST="
+libanl.so.1
+libBrokenLocale.so.1
+libcidn.so.1
+libcrypt.so.1
+libc.so.6
+libdl.so.2
+libgcc_s.so.1
+libm.so.6
+libmemusage.so
+libnsl.so.1
+libnss_compat.so.2
+libnss_dns.so.2
+libnss_files.so.2
+libnss_hesiod.so.2
+libnss_nisplus.so.2
+libnss_nis.so.2
+libresolv.so.2
+librt.so.1
+libSegFault.so
+libstdc++.so.6
+libtic.so.5
+libutil.so.1
+libz.so.1
+libfreebl3.so
+
+libtinfo.so.5
+
+
+libcap-ng.so.0
+libpcap.so.1
+libcrypto.so.10
+libuuid.so.1
+libjansson.so.4
+
+libreadline.so.6
+libselinux.so.1
+libpython2.7.so.1.0
+libncurses.so.5
+libexpat.so.1
+liblzma.so.5
+libpcre.so.1
+
+libsmartcols.so.1
+libgmp.so.10
+"
+
+# libgmp.so.10 gdb
+
+LIB_LIST_UNSTRIPPED="
+libpthread.so.0
+libthread_db.so.1
+"
+
+is_64bits()
+{
+	gcc -E -dM - < /dev/null | grep -q 'define __LP64__ 1'
+}
+
+if is_64bits; then
+	# install 64 bits libraries in /lib64
+	for i in $LIB_LIST ld-linux-x86-64.so.2; do
+		./install_lib.sh $i lib64
+	done
+	for i in $LIB_LIST_UNSTRIPPED; do
+		./install_lib.sh $i lib64 -u
+	done
+	if [ "${HAVE_COMPAT32}" = "y" ]; then
+		# install 32 bits libraries in /lib
+		for i in $LIB_LIST ld-linux.so.2; do
+			CC="${CROSS}gcc ${CPUCFLAGS32}" ./install_lib.sh $i lib
+		done
+		for i in $LIB_LIST_UNSTRIPPED; do
+			CC="${CROSS}gcc ${CPUCFLAGS32}" ./install_lib.sh $i lib -u
+		done
+	fi
+else
+	for i in $LIB_LIST ld-linux.so.2; do
+		./install_lib.sh $i lib
+	done
+	for i in $LIB_LIST_UNSTRIPPED; do
+		./install_lib.sh $i lib -u
+	done
+fi
+
+# libc.so is LD script that may embed library path
+# used to build the toolchain
+# See with Debian lenny using path /emul/ia32-linux/lib
+name=`gcc -print-file-name=libc.so`
+ldname=`cat $name | grep AS_NEEDED | awk '{ print $7; }'`
+if [ -n "$ldname" ]; then
+  # e.g. ldname = /emul/ia32-linux/lib/ld-linux.so.2
+  # we add romfs/emul/ia32-linux/lib -> /lib32
+  prefix=`dirname $ldname`
+  suffix=`basename $prefix`
+  prefix=`dirname $prefix`
+  if [ $prefix != "." -a ! -e ${ROOT_DIR}/romfs/$prefix ]; then
+    mkdir -p ${ROOT_DIR}/romfs/$prefix
+    if [ "$ARCH" = "x86_64" ]; then
+       ln -snf /lib64 ${ROOT_DIR}/romfs/$prefix/$suffix
+    else
+       ln -snf /lib32 ${ROOT_DIR}/romfs/$prefix/$suffix
+    fi
+  fi
+fi

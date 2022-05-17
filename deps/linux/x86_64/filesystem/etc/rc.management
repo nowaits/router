@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# ssh
+mknod -m 666 /dev/ptmx c 5 2
+mkdir /dev/pts && mount devpts /dev/pts -t devpts
+
+# sshd
+chmod 755 /var/empty
+
+sh /etc/tools/sshd_start.sh
+
+ifconfig eth0 192.168.122.12 netmask 255.255.255.0
+route add default gw 192.168.122.1

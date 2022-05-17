@@ -1,0 +1,17 @@
+#!/bin/sh
+
+hostname router 
+
+mount -a
+
+# Prepare module dependency and information
+MODPATH=/lib/modules/`uname -r`
+[ ! -f ${MODPATH}/modules.dep ] && depmod
+
+export disk_dir="/hard_disk"
+
+sh /etc/rc.storage
+
+sh /etc/rc.management
+
+sh /etc/setconsole.sh
