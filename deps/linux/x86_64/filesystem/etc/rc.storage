@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# input  - none -
+# output - BOOTPARTITIONS  USRADMINPARTITION -
+
+# use kernel boot parameter usradmin if defined
+# example: root=/dev/ram0 rw console=ttyS0,115200n8 panic=5 usradmin=sda3
+USRADMINPARTITION=`cat /proc/cmdline |  tr ' ' '\n'  | grep usradmin | sed 's,usradmin=,,'`
+
+if [ ! -z $USRADMINPARTITION ]; then
+        if [ "$USRADMINPARTITION" = "ram" ]; then
+                mount -t ramfs none /usr/admin
+                exit 0
+        fi
+fi
+
+# If "usradmin=" argument was given, wait until the storage device is detected
+if [ ! -z $USRADMINPARTITION ]; then
+	TIMEOUT=10
+	# Parse /proc/partitions:
+	# - delete the 2 first lines
+	# - keep the last column (block device name)
+	# - add a space at the end of block device names
+	# - grep the device name with a trailing space to differenciate names
+	# with the same prefix (sda1 != sda11)
+	while ! sed '1,2d;s/^.* \(.*\)$/\1 /' /proc/partitions |
+	grep -q -F "$DEVICE " &&
+	[ $TIMEOUT -gt 0 ]
+	do
+		echo "Waiting for $DEVICE device: $TIMEOUT"
+		TIMEOUT=$(($TIMEOUT-1))
+		sleep 1
+	done
+
+	if sed '1,2d;s/^.* \(.*\)$/\1 /' /proc/partitions | grep -q -F "$DEVICE "; then
+		echo "Block device for /usr/admin ($DEVICE) found."
+	else
+		echo "Block device for /usr/admin ($DEVICE) *NOT* found."
+	fi
+fi
+
+# Get the list of partitions:
+# XXX TBD: we need only the ext2fs partitions
+# because we are using e2fsck
+
+modprobe sd_mod 2> /dev/null || true
+modprobe ext2 2> /dev/null || true
+modprobe ext3 2> /dev/null || true
+modprobe ext4 2> /dev/null || true
+
+# /proc is mounted by mount -a in /etc/rc
+if [ -f /proc/partitions ] ; then
+  BOOTPARTITIONS=$(cat /proc/partitions | grep "[0-9]$" | awk '{ printf "%s\n", $4}')
+else
+  BOOTPARTITIONS="hda1 hda2"
+fi
+
+# mount disk
+disk_list="hda hda1 hda2 sda sda1 sda2"
+mkdir -p $disk_dir && for disk in $disk_list; do
+    ! mount /dev/$disk $disk_dir > /dev/null 2>&1 || ! echo "** Disk Mount **: /dev/$disk => $disk_dir" || break
+done
+
+exit 0

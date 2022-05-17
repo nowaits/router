@@ -1,0 +1,6 @@
+::sysinit:/bin/sh /etc/rc
+# ::askfirst:-/bin/sh
+::respawn:/sbin/getty -L 115200 ttyS0 vt102
+::shutdown:/bin/sh /etc/rc.shutdown
+# parsed by setconsole.sh
+# setconsole_default=::respawn:/sbin/getty -L 115200 ttyS0 vt102
