@@ -48,6 +48,7 @@ $(error LINUX Build config:$(KERNEL_CONFIG) not find!)
 endif
 
 $(LINUX_DIR):
+	@echo "linux source extracting: $(notdir ${LINUX_SRC}) => $(notdir $@)"
 	@mkdir -p $@ && \
 	tar -xf ${LINUX_SRC} -C $@ --strip-components=1 && \
 	if [ -d $(DEPS_DIR)/patchs/$(LINUX_SRC_VERSION) ]; then \

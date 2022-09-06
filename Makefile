@@ -14,7 +14,7 @@ export OPENSSL_SRC_VERSION = 1.0.2l
 export OPENSSH_SRC_VERSION = 7.5p1
 export GDB_VERSION = 12.1
 export SUDO_VERSION = 1.9.9
-export TREE_SRC_VERSION = 2.0.3
+export TREE_SRC_VERSION = 1.8.0
 
 export KERNEL_DEBUG ?= OFF
 
@@ -31,13 +31,12 @@ OS_ID = $(shell grep '^ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g')
 
 DEVTOOLSET = /opt/rh/devtoolset-9/root
 ifeq ($(OS_ID),centos)
-ifeq ($(wildcard $(DEVTOOLSET)/bin),)
-	$(error Install devtoolset-9: yum install centos-release-scl-rh devtoolset-9)
-else
-	export PATH := $(DEVTOOLSET)/bin:$(PATH)
+ifneq ($(wildcard $(DEVTOOLSET)/bin),)
+# if has gcc 9, use it!
+export PATH := $(DEVTOOLSET)/bin:$(PATH)
 endif
 else
-	$(error TODO: OS:$(OS_ID) need to support!)
+$(error TODO: OS:$(OS_ID) need to support!)
 endif
 
 VENDDIR = $(ROOT_DIR)/vendors/$(CONFIG_VENDOR)/$(CONFIG_PRODUCT)

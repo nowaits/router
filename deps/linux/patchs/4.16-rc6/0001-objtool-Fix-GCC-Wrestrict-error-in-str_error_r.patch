@@ -1,0 +1,25 @@
+From fe03273df204d88a8e2ee2d0f9f1a9d35a281752 Mon Sep 17 00:00:00 2001
+From: jiangxiaoming <jiangxiaoming@xdja.com>
+Date: Mon, 5 Sep 2022 15:20:34 +0800
+Subject: [PATCH 1/1] objtool: Fix GCC Wrestrict error in str_error_r
+
+- More: https://mudongliang.github.io/2021/07/19/objtool-fix-gcc-wrestrict-error-in-str_error_r.html
+---
+ tools/lib/str_error_r.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/lib/str_error_r.c b/tools/lib/str_error_r.c
+index d6d65537b..6aad8308a 100644
+--- a/tools/lib/str_error_r.c
++++ b/tools/lib/str_error_r.c
+@@ -22,6 +22,6 @@ char *str_error_r(int errnum, char *buf, size_t buflen)
+ {
+ 	int err = strerror_r(errnum, buf, buflen);
+ 	if (err)
+-		snprintf(buf, buflen, "INTERNAL ERROR: strerror_r(%d, %p, %zd)=%d", errnum, buf, buflen, err);
++		snprintf(buf, buflen, "INTERNAL ERROR: strerror_r(%d, [buf], %zd)=%d", errnum, buflen, err);
+ 	return buf;
+ }
+-- 
+2.35.0
+

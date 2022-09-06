@@ -23,7 +23,7 @@
 - gdb: `https://ftp.gnu.org/gnu/gdb/gdb-12.1.tar.xz`
   - yum install -y gmp-devel
 - sudo: `https://www.sudo.ws/dist/sudo-1.9.9.tar.gz`
-- tree: `http://mama.indstate.edu/users/ice/tree/src/tree-2.0.3.tgz`
+- tree: `http://mama.indstate.edu/users/ice/tree/src/tree-1.8.0.tgz`
 
 ### 内核调试
 
@@ -64,3 +64,7 @@ echo "allow br0" >> /etc/qemu-kvm/bridge.conf
 - sudo
 - gdb
 - tree
+
+### ISSUES
+
+- python模块编译未正确使用编译的openssl，导致相关模块编译出错
