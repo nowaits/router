@@ -6,6 +6,10 @@ ifndef LINUX_SRC_VERSION
 $(error LINUX_SRC_VERSION not defined)
 endif
 
+ifndef LINUX_OUTPUT
+$(error LINUX_OUTPUT not defined)
+endif
+
 LINUX_SRC := $(wildcard $(DEPS_SRC_ROOT)/linux-$(LINUX_SRC_VERSION).tar.*z)
 ifeq (,$(LINUX_SRC))
 $(error LINUX SRC:$(LINUX_SRC_VERSION) not found in $(DEPS_SRC_ROOT))
@@ -14,7 +18,7 @@ endif
 MACHINE       = x86_64
 ARCH          = x86_64
 
-MAKEARCH_KERNEL := make ARCH=$(ARCH)
+MAKEARCH_KERNEL := make ARCH=$(ARCH) O=$(LINUX_OUTPUT)
 
 LINUX_DIR := $(ROOT_DIR)/.linux-$(LINUX_SRC_VERSION)
 
@@ -54,23 +58,28 @@ $(LINUX_DIR):
 	if [ -d $(DEPS_DIR)/patchs/$(LINUX_SRC_VERSION) ]; then \
 		git apply --directory=$(LINUX_DIR) \
 			--unsafe-paths $(DEPS_DIR)/patchs/$(LINUX_SRC_VERSION)/*.patch; \
-	fi && \
-	make -C $@ mrproper && \
-	cp $(KERNEL_CONFIG) $@/.config && \
-	$(MAKEARCH_KERNEL) -C $@ headers_install INSTALL_HDR_PATH=$@/usr
+	fi
+	$(call show_current_build_time, $@)
+
+linux-src: $(LINUX_DIR)
+
+$(LINUX_OUTPUT)/.config: $(LINUX_DIR)
+	@$(MAKEARCH_KERNEL) -C $(LINUX_DIR) O=$(LINUX_OUTPUT) mrproper && \
+	cp $(KERNEL_CONFIG) $(LINUX_OUTPUT)/.config && \
+	$(MAKEARCH_KERNEL) -C $(LINUX_DIR) headers_install INSTALL_HDR_PATH=$(LINUX_DIR)/usr
 	$(call show_current_build_time, $@)
 
 .PHONY: linux
-linux: $(LINUX_DIR)
+linux: $(LINUX_OUTPUT)/.config
 	@if [ "$(KEEP_CPIO_DESC)" != "1" ]; then \
-		rm -f $(LINUX_DIR)/romfs_cpio.desc ; \
-		touch $(LINUX_DIR)/romfs_cpio.desc ; \
+		rm -f $(LINUX_OUTPUT)/romfs_cpio.desc ; \
+		touch $(LINUX_OUTPUT)/romfs_cpio.desc ; \
 	fi && \
 	$(MAKEARCH_KERNEL) -C $(LINUX_DIR) all bzImage $(JX)
 	$(call show_current_build_time, $@)
 
 linux-modules-install:
-	. $(LINUX_DIR)/.config; if [ "$$CONFIG_MODULES" = "y" ]; then \
+	. $(LINUX_OUTPUT)/.config; if [ "$$CONFIG_MODULES" = "y" ]; then \
 		[ -d $(ROMFS_DIR)/lib/modules ] || mkdir -p $(ROMFS_DIR)/lib/modules; \
 		$(MAKEARCH_KERNEL) -C $(LINUX_DIR) INSTALL_MOD_PATH=$(ROMFS_DIR) DEPMOD=/bin/true modules_install; \
 		rm -f $(ROMFS_DIR)/lib/modules/*/build $(ROMFS_DIR)/lib/modules/*/source; \
@@ -108,8 +117,8 @@ linux-romfs:
 
 copy-image:
 	@echo "Generating image"; \
-	cp $(LINUX_DIR)/arch/$(ARCH)/boot/bzImage $(IMAGE_DIR)/; \
-	cp $(LINUX_DIR)/vmlinux $(IMAGE_DIR)/;
+	cp $(LINUX_OUTPUT)/arch/$(ARCH)/boot/bzImage $(IMAGE_DIR)/; \
+	cp $(LINUX_OUTPUT)/vmlinux $(IMAGE_DIR)/;
 	$(call show_current_build_time, $@)
 	
 prepare-image: 
@@ -120,13 +129,13 @@ prepare-image:
 
 linux-image: prepare-image copy-image
 	@# do the packaging
-	env KERNEL_DIR=$(LINUX_DIR) \
+	env KERNEL_DIR=$(LINUX_OUTPUT) \
 		$(DEPS_DIR)/$(ARCH)/packaging/packaging.sh \
-		$(IMAGE_DIR)/bzImage $(DEPS_DIR)/$(ARCH)/packaging $(ROMFS_DIR) $(LINUX_DIR)
+		$(IMAGE_DIR)/bzImage $(DEPS_DIR)/$(ARCH)/packaging $(ROMFS_DIR) $(LINUX_OUTPUT)
 	$(call show_current_build_time, $@)
 
 .PHONY: image
 image: linux-image
 
 linux-clean:
-	@rm -rf $(LINUX_DIR)
+	@rm -rf $(LINUX_OUTPUT)

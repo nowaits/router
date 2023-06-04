@@ -3,7 +3,14 @@
 ## 工具依赖
 
 - kvm
-  - yum install -y qemu-kvm lsof telnet
+  - centos:
+    ```
+    yum install -y qemu-kvm lsof telnet
+    ```
+  - ubuntu:
+    ```
+    apt-get install libgmp-dev # gdb
+    ```
   - `systemctl restart libvirtd`
   - `kvm -cpu help`
   - `kvm -device help`

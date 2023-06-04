@@ -2,9 +2,9 @@
 set -e
 
 mem=4096
-cores=6
+cores=4
 
-cmdline="console=ttyS0"
+cmdline="console=ttyS0 earlyprintk=ttyS0,115200"
 
 get_free_tcp_port () {
 	port=$1
@@ -84,7 +84,8 @@ clean () {
 
 pidfile=/tmp/kvm-$$.pid
 trap clean EXIT SIGINT SIGQUIT SIGTERM
-kvm -daemonize -pidfile $pidfile -display none -monitor null \
+eval \
+"kvm -daemonize -pidfile $pidfile -display none -monitor null \
 	-cpu host -smp $cores -m $mem ${GDB_ARG} \
 	-serial telnet::$serial_port,server,wait \
 	-net bridge,br=virbr0 \
@@ -92,7 +93,8 @@ kvm -daemonize -pidfile $pidfile -display none -monitor null \
 	-net nic,model=${NIC_TYPE},macaddr=`new_mac` \
 	-net nic,model=${NIC_TYPE},macaddr=`new_mac` \
 	-net nic,model=${NIC_TYPE},macaddr=`new_mac` \
-	$KERNEL $* &
+	$KERNEL $* & \
+"
 
 try_time=30
 while [ $try_time -gt 0 ]; do
