@@ -5,5 +5,9 @@ chmod 755 /var/empty
 
 sh /etc/tools/sshd_start.sh
 
-ifconfig eth0 192.168.122.12 netmask 255.255.255.0
+ip -4 addr add 192.168.122.12/24 dev eth0
+ip -6 addr add fc00::12/48 dev eth0
+
+ip link set dev eth0 up
+
 route add default gw 192.168.122.1
