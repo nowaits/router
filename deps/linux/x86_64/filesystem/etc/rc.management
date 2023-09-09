@@ -1,8 +1,10 @@
 #!/bin/sh
 
 # ssh
-mknod -m 666 /dev/ptmx c 5 2
+mount -t devtmpfs devtmpfs /dev
+
 mkdir /dev/pts && mount devpts /dev/pts -t devpts
+mkdir /dev/shm && mount -t tmpfs tmpfs /dev/shm
 
 # sshd
 chmod 755 /var/empty

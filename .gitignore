@@ -19,7 +19,7 @@ romfs/
 install/
 images/
 build/
-linux/
+linux/**
 .vscode/
 core.*
 .gdb_cache

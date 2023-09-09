@@ -28,6 +28,8 @@ ifneq ($(KERNEL_DEBUG), OFF)
 KERNEL_DEBUG := ON
 endif
 
+BUILD_ONLY_KERNEL := OFF
+
 ifneq ($(shell uname),Darwin)
 OS_ID = $(shell grep '^ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g')
 OS_VERSION_ID= $(shell grep '^VERSION_ID=' /etc/os-release | cut -f2- -d= | sed -e 's/\"//g')
@@ -64,12 +66,16 @@ all: linux $(DIRS) romfs image
 -include $(ROOT_DIR)/deps/linux.mk
 
 romfs: linux-romfs linux-modules-install linux-firmware-install
+ifeq ($(BUILD_ONLY_KERNEL), OFF)
 	@for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir $@ || exit 1 ; done
+endif
 	$(call show_current_build_time, $@)
 
 $(DIRS):
+ifeq ($(BUILD_ONLY_KERNEL), OFF)
 	$(MAKEARCH) JX=$(JX) $(JX) -C $@
 	$(call show_current_build_time, $@)
+endif
 
 .PHONY: clean
 clean:
@@ -80,6 +86,7 @@ deep-clean: clean linux-clean
 	@rm -rf $(IMAGE_DIR) $(ROMFS_DIR) \
 		$(ROOT_DIR)/install $(BUILD_ROOT); \
 	[ -d $(ROOT_DIR)/.linux-*/.git ] || rm -rf $(ROOT_DIR)/.linux-*
+	$(call show_current_build_time, $@)
 		
 
 .PHONY: runkvm

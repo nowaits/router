@@ -40,6 +40,12 @@
   - 切换网卡类型：`make runkvm args="-n=virtio"`
 - gdb连接：`make gdb`
 
+### 编译
+
+- debug: `make`
+- release: `make release`
+- 仅编译内核：`make BUILD_ONLY_KERNEL=true`
+
 ### 硬盘挂载
 
 - 创建：`qemu-img create -f qcow2 /tmp/v.qcow2 10G`
