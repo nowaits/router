@@ -7,8 +7,6 @@ ln -nfs /var/tmp/shells/network.conf inetd.conf
 ln -nfs /var/tmp/shells/hosts hosts
 ln -nfs /var/tmp/shells/resolv.conf resolv.conf
 ln -nfs /var/tmp/inittab inittab
-cd $ROMFS_DIR/dev
-ln -nfs /var/tmp/log log
 cd $ROMFS_DIR
 ln -nfs /var/tmp tmp
 cd $ROMFS_DIR/root

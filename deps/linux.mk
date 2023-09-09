@@ -26,7 +26,7 @@ DEPS_DIR := $(ROOT_DIR)/deps/linux
 
 ROMFS_DIRS = \
 	bin \
-	dev dev/shm \
+	dev \
 	etc etc/scripts \
 	lib lib/modules \
 	proc \

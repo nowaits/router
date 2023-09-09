@@ -2,6 +2,10 @@
 
 hostname router 
 
+mount -t devtmpfs devtmpfs /dev
+
+mkdir /dev/pts # ssh tty
+mkdir /dev/shm
 mount -a
 
 # Prepare module dependency and information

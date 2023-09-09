@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# ssh
-mount -t devtmpfs devtmpfs /dev
-
-mkdir /dev/pts && mount devpts /dev/pts -t devpts
-mkdir /dev/shm && mount -t tmpfs tmpfs /dev/shm
-
 # sshd
 chmod 755 /var/empty
 
