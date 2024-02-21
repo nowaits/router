@@ -109,7 +109,7 @@ linux-romfs:
 		[ -d $(ROMFS_DIR)/$$i ] || mkdir -p $(ROMFS_DIR)/$$i; \
 	done
 	@# install : common romfs, common-arch romfs and arch romfs
-	$(ROOT_DIR)/tools/romfs-inst.sh $(DEPS_DIR)/$(ARCH)/filesystem /; \
+	$(ROOT_DIR)/script/romfs-inst.sh $(DEPS_DIR)/$(ARCH)/filesystem /; \
 	if [ -f ~/.ssh/id_rsa ]; then \
 		install ~/.ssh/id_rsa* -m 600 $(ROMFS_DIR)/etc/ssh; \
 	fi

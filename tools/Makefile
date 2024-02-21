@@ -1,3 +1,5 @@
+dir += openssl
+
 dir += busybox
 dir += bash
 

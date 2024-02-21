@@ -65,7 +65,7 @@ set_val_in_config CONFIG_INITRAMFS_COMPRESSION_NONE ${KERNEL_CONFIG_FILE} n
 set_val_in_config CONFIG_INITRAMFS_COMPRESSION_GZIP ${KERNEL_CONFIG_FILE} y
 
 echo "Building romfs cpio description"
-${ROOT_DIR}/tools/initramfs/romfs2cpio_list.sh ${ROMFS_DIR} > ${KERNEL_DIR}/${ROMFS_DESC}
+${ROOT_DIR}/script/initramfs/romfs2cpio_list.sh ${ROMFS_DIR} > ${KERNEL_DIR}/${ROMFS_DESC}
 echo "Building linux with new initramfs"
 
 # make sure to rebuild it

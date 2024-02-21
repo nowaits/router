@@ -2,6 +2,8 @@
 
 hostname router 
 
+export LD_LIBRARY_PATH=/lib64
+
 mount -t devtmpfs devtmpfs /dev
 
 mkdir /dev/pts # ssh tty

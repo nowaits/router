@@ -1,4 +1,5 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export LD_LIBRARY_PATH=/lib64
 export EDITOR=vi
 export KERNEL_BOOT_FILE=kernel
 if [ "$USER" = "root" ]; then

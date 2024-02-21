@@ -30,15 +30,15 @@ romfs:
 	do \
 		if [ -h "$$file" ];	 \
 		then \
-			$(ROOT_DIR)/tools/romfs-inst.sh -p 755 -s \
+			$(ROOT_DIR)/script/romfs-inst.sh -p 755 -s \
 				"`readlink $$file`" \
 				"/lib64/$$file"; \
 		elif [ -f "$$file" ]; \
 		then \
-			$(ROOT_DIR)/tools/romfs-inst.sh -p 755 "/lib64/$$file"; \
+			$(ROOT_DIR)/script/romfs-inst.sh -p 755 "/lib64/$$file"; \
 		fi \
 	done; \
- 	$(ROOT_DIR)/tools/romfs-inst.sh -p 755 \
+ 	$(ROOT_DIR)/script/romfs-inst.sh -p 755 \
 	 $(BUILD_ROOT)/install/usr/local/ssl/bin/openssl /usr/local/bin/openssl
 	mkdir -p $(ROMFS_DIR)/usr/local/ssl
 	touch $(ROMFS_DIR)/usr/local/ssl/openssl.cnf

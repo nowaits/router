@@ -24,6 +24,10 @@ export show_current_build_time = \
 	@time_used=`echo $$(date +%s.%3N) - $(BUILD_BEGIN_TIME)|bc`; \
 	echo - Now: $${time_used}s Target: ${1} Done
 
+find_lib_path =	\
+	`path=$$(gcc --print-file-name=$(1)); \
+	if [ -f $${path} ]; then echo $${path}; fi`
+
 ifneq ($(KERNEL_DEBUG), OFF)
 KERNEL_DEBUG := ON
 endif
@@ -43,6 +47,7 @@ ifneq ($(wildcard $(DEVTOOLSET)/bin),)
 # if has gcc 9, use it!
 export PATH := $(DEVTOOLSET)/bin:$(PATH)
 endif
+else ifeq ($(OS_ID)-$(OS_VERSION_ID),ubuntu-20.04)
 else ifeq ($(OS_ID)-$(OS_VERSION_ID),ubuntu-22.04)
 else
 $(error TODO: OS:$(OS_ID)-$(OS_VERSION_ID) need to support!)
@@ -51,7 +56,7 @@ endif
 VENDDIR = $(ROOT_DIR)/vendors/$(CONFIG_VENDOR)/$(CONFIG_PRODUCT)
 
 HOSTCC   = cc
-DIRS    = lib user
+DIRS    = tools
 MAKE = make
 
 JX=-j$(shell nproc --ignore=1)
@@ -59,8 +64,23 @@ JX=-j$(shell nproc --ignore=1)
 ARCH          = x86_64
 MAKEARCH := make ARCH=$(ARCH)
 
+#
+# Busybox CONFIG_USE_BB_PWD_GRP=y
+#
+BUSYBOXY_NSS_DEPS= \
+	libnss_compat.so.2 \
+	libnss_dns.so.2 \
+	libnss_files.so.2 \
+	libnss_hesiod.so.2 \
+	libnss_nisplus.so.2 \
+	libnss_nis.so.2 \
+
+LIB_DEPS_LIST= \
+	$(BUSYBOXY_NSS_DEPS)
+
+
 .PHONY: romfs $(DIRS) image
-all: linux $(DIRS) romfs image
+all: linux $(DIRS) romfs romfs-host-deps image
 	$(call show_current_build_time, $@)
 
 -include $(ROOT_DIR)/deps/linux.mk
@@ -77,6 +97,20 @@ ifeq ($(BUILD_ONLY_KERNEL), OFF)
 	$(call show_current_build_time, $@)
 endif
 
+romfs-host-deps:
+	@for f in $(LIB_DEPS_LIST); do \
+		lib=$(call find_lib_path,$$f); \
+		libs="$$lib $$libs"; \
+	done; \
+	fs="`python $(CURDIR)/script/romfs-host-deps.py $(ROMFS_DIR) \"$$libs\"`"; \
+	for f in $$fs; do \
+		dst=$(ROMFS_DIR)/$$f; \
+		mkdir -p `dirname $$dst`; \
+		echo "installing... $$f => $$dst"; \
+		install $$f $$dst; \
+	done
+	$(call show_current_build_time, $@)
+
 .PHONY: clean
 clean:
 	@for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir $@ || exit 1 ; done
@@ -91,9 +125,9 @@ deep-clean: clean linux-clean
 
 .PHONY: runkvm
 runkvm:
-	@tools/kvm-start.sh $(args) --kernel=$(IMAGE_DIR)/bzImage -- $(disk)
+	@script/kvm-start.sh $(args) --kernel=$(IMAGE_DIR)/bzImage -- $(disk)
 
 gdb:
-	@tools/gdb.sh \
+	@script/gdb.sh \
 		--port=1234 \
 		--linux=$(LINUX_OUTPUT)/vmlinux

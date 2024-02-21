@@ -17,4 +17,4 @@ $(BUILD_DIR)/Makefile:
 
 romfs:
 	@cd $(BUILD_DIR); \
-	$(ROOT_DIR)/tools/romfs-inst.sh /usr/bin/lspci
+	$(ROOT_DIR)/script/romfs-inst.sh /usr/bin/lspci

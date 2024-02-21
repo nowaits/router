@@ -33,11 +33,11 @@ clean:
 
 romfs:
 	cd $(BUILD_DIR); \
-	$(ROOT_DIR)/tools/romfs-inst.sh -e CONFIG_USER_SSH_SSH $(bindir)/ssh; \
-	$(ROOT_DIR)/tools/romfs-inst.sh -e CONFIG_USER_SSH_SSH $(bindir)/scp; \
-	$(ROOT_DIR)/tools/romfs-inst.sh -e CONFIG_USER_SSH_SSHD $(sbindir)/sshd; \
-	$(ROOT_DIR)/tools/romfs-inst.sh -e CONFIG_USER_SSH_SSHKEYGEN $(bindir)/ssh-keygen; \
-	$(ROOT_DIR)/tools/romfs-inst.sh -e CONFIG_USER_SSH_SSHKEYGEN $(bindir)/gen-keys
+	$(ROOT_DIR)/script/romfs-inst.sh -e CONFIG_USER_SSH_SSH $(bindir)/ssh; \
+	$(ROOT_DIR)/script/romfs-inst.sh -e CONFIG_USER_SSH_SSH $(bindir)/scp; \
+	$(ROOT_DIR)/script/romfs-inst.sh -e CONFIG_USER_SSH_SSHD $(sbindir)/sshd; \
+	$(ROOT_DIR)/script/romfs-inst.sh -e CONFIG_USER_SSH_SSHKEYGEN $(bindir)/ssh-keygen; \
+	$(ROOT_DIR)/script/romfs-inst.sh -e CONFIG_USER_SSH_SSHKEYGEN $(bindir)/gen-keys
 ifeq ($(CONFIG_USER_SSH_SSH),y)
 	-if [ ! -e $(ROMFS_DIR)/usr/admin/.ssh ]; then \
 	   mkdir $(ROMFS_DIR)/usr/admin/.ssh; \
