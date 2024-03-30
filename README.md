@@ -22,9 +22,9 @@
   - 4x: `https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.19.243.tar.xz`
   - 5x: `https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.18.tar.xz`
 - busybox: `https://www.busybox.net/downloads/busybox-1.35.0.tar.bz2`
-- bash: `https://ftp.gnu.org/gnu/bash/bash-4.4.tar.gz`
+- bash: `https://ftp.gnu.org/gnu/bash/bash-5.2.21.tar.gz`
 - pciutils: `https://codeload.github.com/pciutils/pciutils/tar.gz/refs/tags/v3.7.0`
-- python: `https://www.python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz`
+- python: `https://www.python.org/ftp/python/3.12.2/Python-3.12.2.tar.xz`
 - openssl: `https://www.openssl.org/source/openssl-1.0.2l.tar.gz`
 - openssh: `http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.5p1.tar.gz`
 - gdb: `https://ftp.gnu.org/gnu/gdb/gdb-12.1.tar.xz`

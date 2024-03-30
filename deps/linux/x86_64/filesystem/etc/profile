@@ -21,4 +21,4 @@ if [ -d /etc/profile.d ]; then
 fi
 
 export PYTHONHOME=/
-export PYTHONPATH=/usr/local/lib/python2.7
+export PYTHONPATH=/usr/local/lib/python3.12

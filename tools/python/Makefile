@@ -2,7 +2,7 @@ SRC := $(wildcard $(DEPS_SRC_ROOT)/Python-$(PYTHON_SRC_VERSION).tar.xz)
 ifeq (,$(SRC))
 $(error PYTHON SRC:$(PYTHON_SRC_VERSION) not found in $(DEPS_SRC_ROOT))
 endif
-
+PYTHON_MAIN_VERSION := $(basename $(PYTHON_SRC_VERSION))
 BUILD_DIR=$(BUILD_ROOT)/$(notdir $(CURDIR))-$(PYTHON_SRC_VERSION)
 
 B_HOST := $(BUILD_DIR)/host
@@ -57,14 +57,14 @@ romfs: $(ROMFS_DIR)/usr/local/bin/python
 
 $(ROMFS_DIR)/usr/local/bin/python: $(B_TARGET)/python
 	$(MAKE) $(JX) -C $(B_TARGET) $(TARGET_ARGS) install
-	sh $(CURDIR)/extension/install.sh $(ROMFS_DIR)/usr/local/lib/python2.7/site-packages
+	sh $(CURDIR)/extension/install.sh $(ROMFS_DIR)/usr/local/lib/python${PYTHON_MAIN_VERSION}/site-packages
 	rm -rf $(ROMFS_DIR)/usr/local/bin/pydoc
 	rm -rf $(ROMFS_DIR)/usr/local/bin/idle
 	rm -rf $(ROMFS_DIR)/usr/local/bin/2to3
-	rm -rf $(ROMFS_DIR)/usr/local/include/python2.7
+	rm -rf $(ROMFS_DIR)/usr/local/include/python${PYTHON_MAIN_VERSION}
 	rm -rf $(ROMFS_DIR)/usr/local/bin/smtpd.py
 	rm -rf $(ROMFS_DIR)/lib64/libpython*.a
-	rm -rf $(ROMFS_DIR)/lib64/python2.7/config
+	rm -rf $(ROMFS_DIR)/lib64/python${PYTHON_MAIN_VERSION}/config
 
 # compile the "target" interpreter + C extensions
 $(B_TARGET)/python: $(B_TARGET)/Makefile
