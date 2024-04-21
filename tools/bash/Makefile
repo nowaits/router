@@ -16,7 +16,8 @@ all:  $(BUILD_DIR)/Makefile
 	@make -C $(BUILD_DIR) $@ && strip $(BUILD_DIR)/bash
 
 romfs:
-	[ -f $(BUILD_DIR)/bash ] && cp $(BUILD_DIR)/bash $(ROMFS_DIR)/bin 
+	[ -f $(BUILD_DIR)/bash ] && cp $(BUILD_DIR)/bash $(ROMFS_DIR)/bin
+	[ -d /lib/terminfo ] && cp -r /lib/terminfo $(ROMFS_DIR)/lib/
 
 clean:
 	@rm -rf $(BUILD_DIR)
